@@ -7,7 +7,7 @@
 Dim Line$(32000) ' buffer array
 
 fposy=1 ' file position
-lenfile=2 ' length of file
+lenfile=1 ' length of file
 
 ' reset screen
 Cls
@@ -68,7 +68,6 @@ If user$=CHR$(13) Or user$ = CHR$(0) + "P" Then
 	oldposx=posx
 	posx=1
 	posy=posy+1
-	If fposy>lenfile Then lenfile = fposy
 	If lenfile>31900 Then 
 	 	Print "file too long"
 	 	Sleep
@@ -79,8 +78,9 @@ If user$=CHR$(13) Or user$ = CHR$(0) + "P" Then
       GoTo top:	
 	EndIf
 	If user$=Chr$(13) Then
-      lenfile=lenfile+1
-      For m=1 To lenfile-fposy
+			If fposy>lenfile Then lenfile = fposy
+       lenfile=lenfile+1     
+      For m=0 To lenfile-fposy
       	Line$(lenfile-m)=Line$(lenfile-m-1)
       Next
       If posx<2 Then 
@@ -92,7 +92,7 @@ If user$=CHR$(13) Or user$ = CHR$(0) + "P" Then
 	   	Line$(fposy)=mid$(Line$(fposy-1),oldposx,leng)
 	   	Line$(fposy-1)=Mid$(Line$(fposy-1),1,oldposx-1)
 	   EndIf
-	   If fposy>=lenfile Then lenfile=fposy
+	   If fposy>=lenfile Then lenfile=fposy+1
 	EndIf
 	GoTo top:
 EndIf
@@ -106,6 +106,11 @@ If user$=CHR$(0) + "<"Then
 		Print #1,Line$(m)
 	Next m
 	Close #1
+	Print filen$;" has been saved. Press any key..."
+	x$=""
+	While x$=""
+		x$=InKey$
+	Wend
 	GoTo top:
 EndIf
 ' f3(load)
@@ -149,7 +154,10 @@ If user$= CHR$(0) + ";" Then
 	Print " <Esc> - exit"
 	Print " Column:";posx;" Line:";fposy;" Length:";lenfile
 	Print " Press any key..."
-	Sleep
+	x$=""
+	While x$=""
+		x$=InKey$
+	Wend
 	GoTo top:
 EndIf
 ' Esc(exit)
@@ -179,14 +187,13 @@ If user$=CHR$(8) Or user$=CHR$(0) + "K" Then
 	EndIf
 	If posx=1 Then
 		If user$=CHR$(0) + "K" Then GoTo top:
-		lenfile=lenfile-1
 		If fposy>1 Then fposy=fposy-1
 		If posy>1 Then posy=posy-1
-		If fposy=lenfile Then lenfile=lenfile+1
 		Line$(lenfile+1)=""
 		For m=1 To lenfile-fposy
 			Line$(fposy+m)=Line$(fposy+m+1)
 		Next
+		lenfile=lenfile-1
 		Cls
 		If fposy>1 Then
 			For m=1 To 24
